@@ -1,0 +1,21 @@
+{
+    "name": "moving-note",
+    "version": "1.0.0",
+    "description": "Sync notes via git on desktop and GitHub API on mobile",
+    "main": "main.js",
+    "scripts": {
+        "dev": "node esbuild.config.mjs",
+        "build": "node esbuild.config.mjs production"
+    },
+    "keywords": ["obsidian", "git", "sync", "github"],
+    "author": "Yusen",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "builtin-modules": "^3.3.0",
+        "esbuild": "^0.20.0",
+        "obsidian": "latest",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {}
+}
