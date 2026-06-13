@@ -1,4 +1,4 @@
-import { requestUrl, type Vault, type TFile, type App } from "obsidian";
+import { requestUrl, type Vault, type App } from "obsidian";
 import type { GitHubFile, CompareResult, LocalFileInfo, TreeItem } from "./types";
 
 const API_BASE = "https://api.github.com";
@@ -378,8 +378,8 @@ export class GitHubApiClient {
 
     private async writeFile(vault: Vault, path: string, content: string): Promise<void> {
         const existing = vault.getAbstractFileByPath(path);
-        if (existing instanceof TFile) {
-            await vault.modify(existing, content);
+        if (existing && "extension" in existing) {
+            await vault.modify(existing as import("obsidian").TFile, content);
         } else {
             await vault.create(path, content);
         }
@@ -387,8 +387,8 @@ export class GitHubApiClient {
 
     private async writeFileBinary(vault: Vault, path: string, buffer: ArrayBuffer): Promise<void> {
         const existing = vault.getAbstractFileByPath(path);
-        if (existing instanceof TFile) {
-            await vault.modifyBinary(existing, buffer);
+        if (existing && "extension" in existing) {
+            await vault.modifyBinary(existing as import("obsidian").TFile, buffer);
         } else {
             await vault.createBinary(path, buffer);
         }

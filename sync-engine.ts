@@ -1,4 +1,4 @@
-import { Platform, Notice, type App, type TFile } from "obsidian";
+import { Platform, Notice, type App } from "obsidian";
 import { parseRepoUrl, type MovingNoteSettings, type SyncResult, type LocalFileInfo } from "./types";
 import { GitOperations } from "./git-operations";
 import { GitHubApiClient } from "./github-api";
@@ -276,7 +276,7 @@ export class SyncEngine {
             if (file.path.startsWith(this.app.vault.configDir + "/")) continue;
 
             try {
-                const buffer = await this.app.vault.readBinary(file);
+                const buffer = await this.app.vault.readBinary(file as import("obsidian").TFile);
                 const sha = await this.computeGitSha1(buffer);
                 files[file.path] = sha;
             } catch {
@@ -345,13 +345,13 @@ export class SyncEngine {
         // 处理新增和修改的文件
         for (const path of [...changes.added, ...changes.modified]) {
             const file = this.app.vault.getAbstractFileByPath(path);
-            if (!(file instanceof TFile)) continue;
+            if (!file || !("extension" in file)) continue;
 
             if (this.githubClient["isTextFile"](path)) {
-                const content = await this.app.vault.read(file);
+                const content = await this.app.vault.read(file as import("obsidian").TFile);
                 files.push({ path, content, encoding: "utf-8", mode: "100644" });
             } else {
-                const buffer = await this.app.vault.readBinary(file);
+                const buffer = await this.app.vault.readBinary(file as import("obsidian").TFile);
                 const base64 = this.arrayBufferToBase64(buffer);
                 files.push({ path, content: base64, encoding: "base64", mode: "100644" });
             }
