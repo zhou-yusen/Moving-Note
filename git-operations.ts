@@ -49,7 +49,7 @@ export class GitOperations {
      */
     private run(args: string[]): Promise<string> {
         return new Promise((resolve, reject) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- Required to spawn git process, Node.js module not available via ES import
             const cp = require("child_process") as { spawn: (cmd: string, args: string[], opts: unknown) => ChildProcess };
             const child = cp.spawn("git", args, { cwd: this.cwd });
             let stdout = "";
@@ -100,9 +100,9 @@ export class GitOperations {
      */
     private cleanStaleLocks(): void {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- Required to clean stale git lock files, Node.js module not available via ES import
             const fs = require("fs") as NodeFs;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- Required to construct file paths, Node.js module not available via ES import
             const path = require("path") as NodePath;
             const lockFile = path.join(this.cwd, ".git", "config.lock");
             if (fs.existsSync(lockFile)) {
@@ -226,7 +226,7 @@ export class GitOperations {
     async deleteConflictFile(vault: Vault): Promise<void> {
         const file = vault.getAbstractFileByPath(CONFLICT_FILE);
         if (file) {
-            await this.app.fileManager.trashFile(file, true);
+            await this.app.fileManager.trashFile(file);
         }
     }
 

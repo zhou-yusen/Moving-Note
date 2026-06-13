@@ -178,7 +178,7 @@ export class GitHubApiClient {
                     // 删除本地文件
                     const existing = vault.getAbstractFileByPath(file.filename);
                     if (existing) {
-                        await this.app.fileManager.trashFile(existing, true);
+                        await this.app.fileManager.trashFile(existing);
                     }
                     count++;
                 } else if (

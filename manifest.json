@@ -2,7 +2,7 @@
     "id": "moving-note",
     "name": "Moving Note",
     "version": "1.0.0",
-    "minAppVersion": "1.2.0",
+    "minAppVersion": "1.4.0",
     "description": "Sync your notes via Git on desktop and GitHub API on mobile. Simple, reliable, cross-device.",
     "author": "Yusen",
     "authorUrl": "https://github.com/zhou-yusen",
