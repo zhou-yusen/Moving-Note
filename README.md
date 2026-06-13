@@ -1,6 +1,6 @@
 # Moving Note
 
-English | [中文](README_zh.md)
+[中文](README_zh.md) | English
 
 > A simple Obsidian sync plugin: Git on desktop, GitHub API on mobile. Full read-write support on both platforms.
 

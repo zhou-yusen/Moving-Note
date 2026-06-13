@@ -1,6 +1,6 @@
 # Moving Note
 
-[English](README.md) | 中文
+中文 | [English](README.md)
 
 > 一个简洁的 Obsidian 同步插件：桌面端通过 Git 管理，移动端通过 GitHub API 同步。
 
