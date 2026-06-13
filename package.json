@@ -1,6 +1,6 @@
 {
     "name": "moving-note",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Sync notes via git on desktop and GitHub API on mobile",
     "main": "main.js",
     "scripts": {
