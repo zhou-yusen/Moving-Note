@@ -1,5 +1,19 @@
 import { requestUrl } from "obsidian";
 
+/** GitHub OAuth response types */
+interface DeviceCodeResponse {
+    device_code: string;
+    user_code: string;
+    verification_uri: string;
+    expires_in: number;
+    interval: number;
+}
+interface TokenResponse {
+    access_token?: string;
+    error?: string;
+}
+interface UserResponse { login: string }
+
 /**
  * GitHub OAuth Device Flow
  * 无需手动创建 Token，用户只需在浏览器中输入验证码即可登录
@@ -54,7 +68,7 @@ export async function startDeviceFlow(
         });
 
         const { device_code, user_code, verification_uri, expires_in, interval } =
-            codeResp.json;
+            codeResp.json as DeviceCodeResponse;
 
         // Step 2: 通知 UI 显示验证码
         onCodeReady(user_code, verification_uri);
@@ -83,7 +97,7 @@ export async function startDeviceFlow(
                     }),
                 });
 
-                const data = tokenResp.json;
+                const data = tokenResp.json as TokenResponse;
 
                 if (data.access_token) {
                     // 登录成功！获取用户名
@@ -98,7 +112,7 @@ export async function startDeviceFlow(
                     return {
                         success: true,
                         token: data.access_token,
-                        username: userResp.json.login,
+                        username: (userResp.json as UserResponse).login,
                     };
                 }
 
@@ -146,7 +160,7 @@ export async function validateToken(
                 Accept: "application/vnd.github.v3+json",
             },
         });
-        return { valid: true, username: resp.json.login };
+        return { valid: true, username: (resp.json as UserResponse).login };
     } catch {
         return { valid: false };
     }

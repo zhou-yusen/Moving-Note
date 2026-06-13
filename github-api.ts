@@ -4,6 +4,16 @@ import type { GitHubFile, CompareResult, LocalFileInfo, TreeItem } from "./types
 const API_BASE = "https://api.github.com";
 const RAW_BASE = "https://raw.githubusercontent.com";
 
+/** GitHub API response types */
+interface ShaResponse { sha: string }
+interface TreeResponse { sha: string; tree: GitHubFile[]; truncated: boolean }
+interface CompareResponse {
+    files: { filename: string; status: string; previous_filename?: string }[];
+    commits: { sha: string }[];
+}
+interface UserResponse { login: string }
+interface GitCommitResponse { sha: string; tree: { sha: string } }
+
 export class GitHubApiClient {
     private token: string;
     private owner: string;
@@ -34,7 +44,7 @@ export class GitHubApiClient {
             url: `${API_BASE}/repos/${this.owner}/${this.repo}/commits/${this.branch}`,
             headers: this.headers,
         });
-        return resp.json.sha;
+        return (resp.json as ShaResponse).sha;
     }
 
     /**
@@ -45,7 +55,7 @@ export class GitHubApiClient {
             url: `${API_BASE}/repos/${this.owner}/${this.repo}/git/trees/${this.branch}?recursive=1`,
             headers: this.headers,
         });
-        const data = resp.json;
+        const data = resp.json as TreeResponse;
         if (data.truncated) {
             console.warn("[moving-note] File tree truncated, some files may be missing");
         }
@@ -60,19 +70,13 @@ export class GitHubApiClient {
             url: `${API_BASE}/repos/${this.owner}/${this.repo}/compare/${oldSha}...${this.branch}`,
             headers: this.headers,
         });
-        const data = resp.json;
+        const data = resp.json as CompareResponse;
         return {
-            files: data.files.map(
-                (f: {
-                    filename: string;
-                    status: string;
-                    previous_filename?: string;
-                }) => ({
-                    filename: f.filename,
-                    status: f.status,
-                    previous_filename: f.previous_filename,
-                })
-            ),
+            files: data.files.map((f) => ({
+                filename: f.filename,
+                status: f.status,
+                previous_filename: f.previous_filename,
+            })),
             newSha: data.commits[data.commits.length - 1]?.sha ?? oldSha,
         };
     }
@@ -229,7 +233,7 @@ export class GitHubApiClient {
                 url: `${API_BASE}/user`,
                 headers: this.headers,
             });
-            return { valid: true, username: resp.json.login };
+            return { valid: true, username: (resp.json as UserResponse).login };
         } catch {
             return { valid: false };
         }
@@ -246,7 +250,7 @@ export class GitHubApiClient {
             url: `${API_BASE}/repos/${this.owner}/${this.repo}/git/commits/${commitSha}`,
             headers: this.headers,
         });
-        return resp.json.tree.sha;
+        return (resp.json as GitCommitResponse).tree.sha;
     }
 
     /**
@@ -259,7 +263,7 @@ export class GitHubApiClient {
             headers: this.headers,
             body: JSON.stringify({ content, encoding }),
         });
-        return resp.json.sha;
+        return (resp.json as ShaResponse).sha;
     }
 
     /**
@@ -272,7 +276,7 @@ export class GitHubApiClient {
             headers: this.headers,
             body: JSON.stringify({ base_tree: baseTreeSha, tree: treeItems }),
         });
-        return resp.json.sha;
+        return (resp.json as ShaResponse).sha;
     }
 
     /**
@@ -285,7 +289,7 @@ export class GitHubApiClient {
             headers: this.headers,
             body: JSON.stringify({ message, tree: treeSha, parents: [parentSha] }),
         });
-        return resp.json.sha;
+        return (resp.json as ShaResponse).sha;
     }
 
     /**
@@ -353,7 +357,7 @@ export class GitHubApiClient {
             url: `${API_BASE}/repos/${this.owner}/${this.repo}/contents/${encodeURI(path)}?ref=${this.branch}`,
             headers: this.headers,
         });
-        const fileSha = resp.json.sha;
+        const fileSha = (resp.json as ShaResponse).sha;
 
         await requestUrl({
             url: `${API_BASE}/repos/${this.owner}/${this.repo}/contents/${encodeURI(path)}`,

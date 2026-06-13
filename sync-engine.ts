@@ -276,7 +276,7 @@ export class SyncEngine {
             if (file.path.startsWith(this.app.vault.configDir + "/")) continue;
 
             try {
-                const buffer = await this.app.vault.readBinary(file as import("obsidian").TFile);
+                const buffer = await this.app.vault.readBinary(file);
                 const sha = await this.computeGitSha1(buffer);
                 files[file.path] = sha;
             } catch {
@@ -351,7 +351,7 @@ export class SyncEngine {
                 const content = await this.app.vault.read(file as import("obsidian").TFile);
                 files.push({ path, content, encoding: "utf-8", mode: "100644" });
             } else {
-                const buffer = await this.app.vault.readBinary(file as import("obsidian").TFile);
+                const buffer = await this.app.vault.readBinary(file);
                 const base64 = this.arrayBufferToBase64(buffer);
                 files.push({ path, content: base64, encoding: "base64", mode: "100644" });
             }
@@ -524,7 +524,7 @@ export class SyncEngine {
     private formatCommitMessage(): string {
         const now = new Date();
         const date = now.toISOString().replace("T", " ").substring(0, 19);
-        const hostname = this.settings.repoOwner;
+        const hostname = this.settings.githubUsername || "unknown";
         return this.settings.commitMessage
             .replace("{{date}}", date)
             .replace("{{hostname}}", hostname);

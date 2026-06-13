@@ -39,14 +39,15 @@ export default class MovingNotePlugin extends Plugin {
         // Sync on startup
         if (this.settings.syncOnStartup) {
             this.app.workspace.onLayoutReady(() => {
-                // Delay 2 seconds before syncing, wait for Obsidian to fully load
-                window.setTimeout(async () => {
-                    if (this.isConfigured()) {
-                        const result = await this.syncNow();
-                        if (result.filesChanged > 0) {
-                            new Notice(result.message);
+                window.setTimeout(() => {
+                    void (async () => {
+                        if (this.isConfigured()) {
+                            const result = await this.syncNow();
+                            if (result.filesChanged > 0) {
+                                new Notice(result.message);
+                            }
                         }
-                    }
+                    })();
                 }, 2000);
             });
         }
