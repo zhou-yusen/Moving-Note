@@ -1,1 +1,48 @@
 /* moving-note styles */
+
+/* Sync button (image as button) */
+.moving-note-sync-btn {
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+.moving-note-sync-btn img {
+    height: 36px;
+    cursor: pointer;
+}
+
+.moving-note-sync-btn img:hover {
+    opacity: 0.8;
+}
+
+.moving-note-sync-btn img.syncing {
+    opacity: 0.5;
+}
+
+/* Status text */
+.moving-note-status {
+    color: var(--text-muted);
+}
+
+/* Parsed repo info */
+.moving-note-parsed {
+    color: var(--text-muted);
+    margin: -8px 0 16px 0;
+}
+
+/* Parse error */
+.moving-note-parse-error {
+    color: var(--text-error);
+    margin: -8px 0 16px 0;
+}
+
+/* Hint text */
+.moving-note-hint {
+    color: var(--text-accent);
+}
+
+/* Full width input */
+.moving-note-full-width {
+    width: 100%;
+}

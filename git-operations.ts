@@ -3,8 +3,8 @@ import { t } from "./locale";
 
 const CONFLICT_FILE = "conflict-files-moving-note.md";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const require: (id: string) => any;
+// Node.js require function, available in Obsidian desktop environment
+declare const require: (id: string) => unknown;
 
 interface GitStatus {
     modified: string[];

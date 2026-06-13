@@ -44,25 +44,21 @@ export class MovingNoteSettingTab extends PluginSettingTab {
             });
 
         // ─── Sync ────────────────────────────────────────
-        containerEl.createEl("h3", { text: t("settings.heading.sync") });
+        new Setting(containerEl).setName(t("settings.heading.sync")).setHeading();
 
         new Setting(containerEl)
             .setName(t("settings.syncDocs"))
             .setDesc(t("settings.syncDocs_desc"))
             .addButton((btn) => {
+                btn.buttonEl.addClass("moving-note-sync-btn");
                 btn.buttonEl.innerHTML = "";
-                btn.buttonEl.style.border = "none";
-                btn.buttonEl.style.background = "none";
-                btn.buttonEl.style.padding = "0";
                 const img = btn.buttonEl.createEl("img");
                 img.src = SYNC_ICON;
-                img.style.height = "36px";
-                img.style.cursor = "pointer";
                 img.addEventListener("click", async () => {
-                    img.style.opacity = "0.5";
+                    img.addClass("syncing");
                     const result = await this.plugin.syncNow();
                     new Notice(result.message);
-                    img.style.opacity = "1";
+                    img.removeClass("syncing");
                 });
             });
 
@@ -72,11 +68,11 @@ export class MovingNoteSettingTab extends PluginSettingTab {
             statusP.textContent = t("settings.lastSync", {
                 sha: this.plugin.settings.lastSyncSha.substring(0, 8),
             });
-            statusP.style.color = "var(--text-muted)";
+            statusP.addClass("moving-note-status");
         }
 
         // ─── Sync Settings ───────────────────────────────
-        containerEl.createEl("h3", { text: t("settings.heading.syncSettings") });
+        new Setting(containerEl).setName(t("settings.heading.syncSettings")).setHeading();
 
         new Setting(containerEl)
             .setName(t("settings.autoSyncInterval"))
@@ -123,7 +119,7 @@ export class MovingNoteSettingTab extends PluginSettingTab {
             );
 
         // ─── Remote Repository ───────────────────────────
-        containerEl.createEl("h3", { text: t("settings.heading.remote") });
+        new Setting(containerEl).setName(t("settings.heading.remote")).setHeading();
 
         new Setting(containerEl)
             .setName(t("settings.repoUrl"))
@@ -136,7 +132,7 @@ export class MovingNoteSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                         this.display();
                     });
-                text.inputEl.style.width = "100%";
+                text.inputEl.addClass("moving-note-full-width");
             });
 
         // Display parsed result
@@ -147,13 +143,11 @@ export class MovingNoteSettingTab extends PluginSettingTab {
                 owner: parsed.owner,
                 repo: parsed.repo,
             });
-            desc.style.color = "var(--text-muted)";
-            desc.style.margin = "-8px 0 16px 0";
+            desc.addClass("moving-note-parsed");
         } else if (this.plugin.settings.repoUrl) {
             const desc = containerEl.createEl("p");
             desc.textContent = t("settings.parseError");
-            desc.style.color = "var(--text-error)";
-            desc.style.margin = "-8px 0 16px 0";
+            desc.addClass("moving-note-parse-error");
         }
 
         new Setting(containerEl)
@@ -171,7 +165,7 @@ export class MovingNoteSettingTab extends PluginSettingTab {
             );
 
         // ─── GitHub Login ────────────────────────────────
-        containerEl.createEl("h3", { text: t("settings.heading.github") });
+        new Setting(containerEl).setName(t("settings.heading.github")).setHeading();
 
         if (this.plugin.settings.githubToken) {
             // Logged in
@@ -207,7 +201,7 @@ export class MovingNoteSettingTab extends PluginSettingTab {
                 .setDesc(t("settings.step2_desc"))
                 .addText((text) => {
                     text.inputEl.type = "password";
-                    text.inputEl.style.width = "100%";
+                    text.inputEl.addClass("moving-note-full-width");
                     text.setPlaceholder(t("settings.token_placeholder"))
                         .setValue(this.plugin.settings.githubToken)
                         .onChange(async (value) => {
@@ -246,15 +240,15 @@ export class MovingNoteSettingTab extends PluginSettingTab {
         if (!this.plugin.settings.repoUrl) {
             const hintP = containerEl.createEl("p");
             hintP.textContent = t("settings.hint.noRepo");
-            hintP.style.color = "var(--text-accent)";
+            hintP.addClass("moving-note-hint");
         } else if (!this.plugin.settings.githubToken) {
             const hintP = containerEl.createEl("p");
             hintP.textContent = t("settings.hint.noToken");
-            hintP.style.color = "var(--text-accent)";
+            hintP.addClass("moving-note-hint");
         }
 
         // ─── Support Author ──────────────────────────────
-        containerEl.createEl("h3", { text: t("settings.heading.support") });
+        new Setting(containerEl).setName(t("settings.heading.support")).setHeading();
 
         new Setting(containerEl)
             .setName(t("settings.donate"))
