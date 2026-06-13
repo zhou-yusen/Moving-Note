@@ -32,15 +32,15 @@ export default class MovingNotePlugin extends Plugin {
         // Listen for settings changed event
         this.registerEvent(
             this.app.workspace.on("moving-note:settings-changed", () => {
-                this.saveSettings();
+                void this.saveSettings();
             })
         );
 
         // Sync on startup
         if (this.settings.syncOnStartup) {
-            this.app.workspace.onLayoutReady(async () => {
+            this.app.workspace.onLayoutReady(() => {
                 // Delay 2 seconds before syncing, wait for Obsidian to fully load
-                setTimeout(async () => {
+                window.setTimeout(async () => {
                     if (this.isConfigured()) {
                         const result = await this.syncNow();
                         if (result.filesChanged > 0) {
@@ -115,7 +115,7 @@ export default class MovingNotePlugin extends Plugin {
             checkCallback: (checking) => {
                 if (this.isConfigured()) {
                     if (!checking) {
-                        this.push().then((r) => new Notice(r.message));
+                        void this.push().then((r) => new Notice(r.message));
                     }
                     return true;
                 }

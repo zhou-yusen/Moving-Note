@@ -1,4 +1,4 @@
-import { requestUrl, type Vault, type RequestUrlResponse } from "obsidian";
+import { requestUrl, type Vault, type TFile, type App } from "obsidian";
 import type { GitHubFile, CompareResult, LocalFileInfo, TreeItem } from "./types";
 
 const API_BASE = "https://api.github.com";
@@ -9,12 +9,14 @@ export class GitHubApiClient {
     private owner: string;
     private repo: string;
     private branch: string;
+    private app: App;
 
-    constructor(token: string, owner: string, repo: string, branch: string) {
+    constructor(token: string, owner: string, repo: string, branch: string, app: App) {
         this.token = token;
         this.owner = owner;
         this.repo = repo;
         this.branch = branch;
+        this.app = app;
     }
 
     private get headers(): Record<string, string> {
@@ -176,7 +178,7 @@ export class GitHubApiClient {
                     // 删除本地文件
                     const existing = vault.getAbstractFileByPath(file.filename);
                     if (existing) {
-                        await vault.delete(existing);
+                        await this.app.fileManager.trashFile(existing, true);
                     }
                     count++;
                 } else if (
@@ -189,7 +191,7 @@ export class GitHubApiClient {
                     if (file.status === "renamed" && file.previous_filename) {
                         const old = vault.getAbstractFileByPath(file.previous_filename);
                         if (old) {
-                            await vault.delete(old);
+                            await this.app.fileManager.trashFile(old, true);
                         }
                     }
 
@@ -376,8 +378,8 @@ export class GitHubApiClient {
 
     private async writeFile(vault: Vault, path: string, content: string): Promise<void> {
         const existing = vault.getAbstractFileByPath(path);
-        if (existing && "extension" in existing) {
-            await vault.modify(existing as import("obsidian").TFile, content);
+        if (existing instanceof Object && "extension" in existing) {
+            await vault.modify(existing as TFile, content);
         } else {
             await vault.create(path, content);
         }
@@ -385,8 +387,8 @@ export class GitHubApiClient {
 
     private async writeFileBinary(vault: Vault, path: string, buffer: ArrayBuffer): Promise<void> {
         const existing = vault.getAbstractFileByPath(path);
-        if (existing && "extension" in existing) {
-            await vault.modifyBinary(existing as import("obsidian").TFile, buffer);
+        if (existing instanceof Object && "extension" in existing) {
+            await vault.modifyBinary(existing as TFile, buffer);
         } else {
             await vault.createBinary(path, buffer);
         }

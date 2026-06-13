@@ -1,9 +1,10 @@
-import type { TFile, Vault } from "obsidian";
+import type { TFile, Vault, App } from "obsidian";
 import { t } from "./locale";
 
 const CONFLICT_FILE = "conflict-files-moving-note.md";
 
 // Node.js require function, available in Obsidian desktop environment
+// Used to access child_process for running git commands
 declare const require: (id: string) => unknown;
 
 interface GitStatus {
@@ -15,15 +16,32 @@ interface GitStatus {
     currentBranch: string;
 }
 
+interface ChildProcess {
+    stdout: { on: (event: string, cb: (data: Buffer) => void) => void };
+    stderr: { on: (event: string, cb: (data: Buffer) => void) => void };
+    on: (event: string, cb: (...args: unknown[]) => void) => void;
+}
+
+interface NodeFs {
+    existsSync(path: string): boolean;
+    unlinkSync(path: string): void;
+}
+
+interface NodePath {
+    join(...segments: string[]): string;
+}
+
 /**
  * 直接调用系统 git 命令
  * 用 eval("require") 绕过 Obsidian 模块加载器对 child_process 的拦截
  */
 export class GitOperations {
     private cwd: string;
+    private app: App;
 
-    constructor(vaultPath: string) {
+    constructor(vaultPath: string, app: App) {
         this.cwd = vaultPath;
+        this.app = app;
     }
 
     /**
@@ -31,14 +49,14 @@ export class GitOperations {
      */
     private run(args: string[]): Promise<string> {
         return new Promise((resolve, reject) => {
-            const { spawn } = require("child_process");
-            const child = spawn("git", args, { cwd: this.cwd });
+            const cp = require("child_process") as { spawn: (cmd: string, args: string[], opts: unknown) => ChildProcess };
+            const child = cp.spawn("git", args, { cwd: this.cwd });
             let stdout = "";
             let stderr = "";
             child.stdout.on("data", (data: Buffer) => { stdout += data.toString(); });
             child.stderr.on("data", (data: Buffer) => { stderr += data.toString(); });
-            child.on("error", (err: Error) => reject(err));
-            child.on("close", (code: number) => {
+            child.on("error", (err: unknown) => reject(err instanceof Error ? err : new Error(String(err))));
+            child.on("close", (code: unknown) => {
                 if (code === 0) {
                     resolve(stdout.trim());
                 } else {
@@ -81,8 +99,8 @@ export class GitOperations {
      */
     private cleanStaleLocks(): void {
         try {
-            const fs = require("fs");
-            const path = require("path");
+            const fs = require("fs") as NodeFs;
+            const path = require("path") as NodePath;
             const lockFile = path.join(this.cwd, ".git", "config.lock");
             if (fs.existsSync(lockFile)) {
                 fs.unlinkSync(lockFile);
@@ -155,7 +173,6 @@ export class GitOperations {
         try {
             return await this.run(["push", "origin", targetBranch]);
         } catch (e) {
-            // 如果没有设置上游分支，自动设置
             const msg = e instanceof Error ? e.message : String(e);
             if (msg.includes("no upstream branch") || msg.includes("does not match any")) {
                 return this.run(["push", "--set-upstream", "origin", targetBranch]);
@@ -205,7 +222,9 @@ export class GitOperations {
 
     async deleteConflictFile(vault: Vault): Promise<void> {
         const file = vault.getAbstractFileByPath(CONFLICT_FILE);
-        if (file) await vault.delete(file);
+        if (file) {
+            await this.app.fileManager.trashFile(file, true);
+        }
     }
 
     async getRemoteUrl(remote: string = "origin"): Promise<string | null> {
@@ -236,7 +255,6 @@ export class GitOperations {
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
             if (msg.includes("did not match any file") || msg.includes("not a branch")) {
-                // 本地不存在该分支，创建并切换
                 await this.run(["checkout", "-b", branch]);
             } else {
                 throw e;
@@ -250,7 +268,6 @@ export class GitOperations {
     async stash(): Promise<boolean> {
         try {
             const output = await this.run(["stash", "push", "-m", "moving-note: auto-stash before branch switch"]);
-            // "No local changes to save" 说明没有需要暂存的
             return !output.includes("No local changes");
         } catch {
             return false;
@@ -264,7 +281,6 @@ export class GitOperations {
         try {
             await this.run(["stash", "pop"]);
         } catch {
-            // 恢复失败（如冲突），不阻塞流程
             console.log("[moving-note] Stash pop failed, changes remain in stash");
         }
     }

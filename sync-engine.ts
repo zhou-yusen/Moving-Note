@@ -39,7 +39,7 @@ export class SyncEngine {
                 return;
             }
 
-            this.gitOps = new GitOperations(vaultPath);
+            this.gitOps = new GitOperations(vaultPath, this.app);
 
             // 如果不是 git 仓库，初始化
             const isRepo = await this.gitOps.isRepo();
@@ -69,7 +69,8 @@ export class SyncEngine {
             this.settings.githubToken,
             parsed.owner,
             parsed.repo,
-            this.settings.branch
+            this.settings.branch,
+            this.app
         );
     }
 
@@ -222,7 +223,7 @@ export class SyncEngine {
             localChanges.deleted.length > 0;
 
         // 2. 拉取远程更新
-        const { count: pullCount, newSha } = await this.githubClient.incrementalSync(
+        const { count: pullCount } = await this.githubClient.incrementalSync(
             this.app.vault,
             lastSha
         );
@@ -271,8 +272,8 @@ export class SyncEngine {
         const allFiles = this.app.vault.getFiles();
 
         for (const file of allFiles) {
-            // 跳过 .obsidian 目录
-            if (file.path.startsWith(".obsidian/")) continue;
+            // 跳过配置目录
+            if (file.path.startsWith(this.app.vault.configDir + "/")) continue;
 
             try {
                 const buffer = await this.app.vault.readBinary(file);

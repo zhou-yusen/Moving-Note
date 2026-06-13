@@ -1,4 +1,4 @@
-import { requestUrl, Notice } from "obsidian";
+import { requestUrl } from "obsidian";
 
 /**
  * GitHub OAuth Device Flow
@@ -66,7 +66,7 @@ export async function startDeviceFlow(
 
         while (Date.now() - startTime < timeout) {
             // 等待间隔
-            await new Promise((resolve) => setTimeout(resolve, pollInterval));
+            await new Promise<void>((resolve) => window.setTimeout(resolve, pollInterval));
 
             try {
                 const tokenResp = await requestUrl({
