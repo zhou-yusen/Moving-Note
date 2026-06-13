@@ -378,8 +378,8 @@ export class GitHubApiClient {
 
     private async writeFile(vault: Vault, path: string, content: string): Promise<void> {
         const existing = vault.getAbstractFileByPath(path);
-        if (existing instanceof Object && "extension" in existing) {
-            await vault.modify(existing as TFile, content);
+        if (existing instanceof TFile) {
+            await vault.modify(existing, content);
         } else {
             await vault.create(path, content);
         }
@@ -387,8 +387,8 @@ export class GitHubApiClient {
 
     private async writeFileBinary(vault: Vault, path: string, buffer: ArrayBuffer): Promise<void> {
         const existing = vault.getAbstractFileByPath(path);
-        if (existing instanceof Object && "extension" in existing) {
-            await vault.modifyBinary(existing as TFile, buffer);
+        if (existing instanceof TFile) {
+            await vault.modifyBinary(existing, buffer);
         } else {
             await vault.createBinary(path, buffer);
         }

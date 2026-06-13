@@ -194,11 +194,13 @@ export default class MovingNotePlugin extends Plugin {
             this.isConfigured()
         ) {
             this.autoSyncIntervalId = window.setInterval(
-                async () => {
-                    const result = await this.syncNow();
-                    if (result.filesChanged > 0) {
-                        new Notice(result.message);
-                    }
+                () => {
+                    void (async () => {
+                        const result = await this.syncNow();
+                        if (result.filesChanged > 0) {
+                            new Notice(result.message);
+                        }
+                    })();
                 },
                 this.settings.autoSyncInterval * 60 * 1000
             );

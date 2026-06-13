@@ -54,11 +54,13 @@ export class MovingNoteSettingTab extends PluginSettingTab {
                 btn.buttonEl.innerHTML = "";
                 const img = btn.buttonEl.createEl("img");
                 img.src = SYNC_ICON;
-                img.addEventListener("click", async () => {
+                img.addEventListener("click", () => {
                     img.addClass("syncing");
-                    const result = await this.plugin.syncNow();
-                    new Notice(result.message);
-                    img.removeClass("syncing");
+                    void (async () => {
+                        const result = await this.plugin.syncNow();
+                        new Notice(result.message);
+                        img.removeClass("syncing");
+                    })();
                 });
             });
 

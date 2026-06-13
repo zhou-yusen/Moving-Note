@@ -345,14 +345,13 @@ export class SyncEngine {
         // 处理新增和修改的文件
         for (const path of [...changes.added, ...changes.modified]) {
             const file = this.app.vault.getAbstractFileByPath(path);
-            if (!file || !("extension" in file)) continue;
+            if (!(file instanceof TFile)) continue;
 
-            const tfile = file as TFile;
             if (this.githubClient["isTextFile"](path)) {
-                const content = await this.app.vault.read(tfile);
+                const content = await this.app.vault.read(file);
                 files.push({ path, content, encoding: "utf-8", mode: "100644" });
             } else {
-                const buffer = await this.app.vault.readBinary(tfile);
+                const buffer = await this.app.vault.readBinary(file);
                 const base64 = this.arrayBufferToBase64(buffer);
                 files.push({ path, content: base64, encoding: "base64", mode: "100644" });
             }

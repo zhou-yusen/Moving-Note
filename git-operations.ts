@@ -49,6 +49,7 @@ export class GitOperations {
      */
     private run(args: string[]): Promise<string> {
         return new Promise((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
             const cp = require("child_process") as { spawn: (cmd: string, args: string[], opts: unknown) => ChildProcess };
             const child = cp.spawn("git", args, { cwd: this.cwd });
             let stdout = "";
@@ -99,7 +100,9 @@ export class GitOperations {
      */
     private cleanStaleLocks(): void {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
             const fs = require("fs") as NodeFs;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
             const path = require("path") as NodePath;
             const lockFile = path.join(this.cwd, ".git", "config.lock");
             if (fs.existsSync(lockFile)) {
@@ -213,7 +216,7 @@ export class GitOperations {
 
         const existing = vault.getAbstractFileByPath(CONFLICT_FILE);
         const content = lines.join("\n");
-        if (existing && "extension" in existing) {
+        if (existing instanceof Object && "extension" in existing) {
             await vault.modify(existing as TFile, content);
         } else {
             await vault.create(CONFLICT_FILE, content);
